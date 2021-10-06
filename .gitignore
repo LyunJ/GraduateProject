@@ -1,0 +1,15 @@
+modelService/modelService/__pycache__/
+modelService/apis/__pycache__/
+modelService/apis/migrations/
+
+model-server/
+
+learningService/learningService/__pycache__/
+learningService/deeplearning/__pycache__/
+learningService/deeplearning/migrations/
+
+labelsService/labelsService/__pycache__/
+labelsService/labeling/__pycache__/
+labelsService/labeling/migrations/
+
+eureka-microservices/
