@@ -5,25 +5,38 @@ from bson.objectid import ObjectId
 import json
 from .execFile.getDataFromKafkaAndSendToKafka import producer_process
 
-
-db = MongoClient("mongodb://121.130.68.170:27017/")
-mydb = db['test']
-mycol = mydb['image']
-
+def connectMongo(selector):
+    if selector == 'write':
+        write_db = MongoClient(['121.130.68.170:27020','121.130.68.170:27021','121.130.68.170:27022'],replicaset='rs_write')
+        mydb = write_db['test']
+        mycol = mydb['image']
+        return mycol
+    elif selector == 'read':
+        read_db = MongoClient(['121.130.68.170:27017','121.130.68.170:27018','121.130.68.170:27019'],replicaset='rs0')
+        mydb = read_db['test']
+        mycol = mydb['image']
+        return mycol
+    else:
+        return -1
 # Create your views here.
 
 def image(request):
     # GET
     if request.method == 'GET':
-        data = mycol.find_one({"read_count": {"$lt" : 10}})
-        print(data['_id'])
+        writedb = connectMongo('write')
+        readdb = connectMongo('read')
+        
+        wdata = writedb.find_one({"read_count": {"$lt" : 10}})
+        rdata = readdb.find_one({"_id" : wdata['_id']})
+        
         responseData = {
-            "image_id" : str(data['_id']),
-            "image" : data['image'],
-            "labels" : data['labels']
+            "image_id" : str(rdata['_id']),
+            "image" : rdata['image'],
+            "labels" : rdata['labels']
         }
+        
         # mongodb read_count + 1
-        mycol.update({"_id" : data['_id']}, {"$set" : {"read_count" : data['read_count'] + 1}})
+        writedb.update({"_id" : wdata['_id']}, {"$set" : {"read_count" : wdata['read_count'] + 1}})
         return JsonResponse(responseData)
     
     
@@ -36,8 +49,14 @@ def image(request):
         # selected_label
         
         data = json.loads(request.body)
-        image = mycol.find_one({"_id" : ObjectId(data['image_id'])})
-        if image['write_count'] > 10:
+        
+        writedb = connectMongo('write')
+        readdb = connectMongo('read')
+        
+        image = writedb.find_one({"_id" : ObjectId(data['image_id'])})
+        imagefile = readdb.find_one({"_id":ObjectId(data['image_id'])})['image']
+        
+        if image['write_count'] >= 9:
             # write table에서 labeling 결과 가져오기
             labeling_data = image['labels']
             
@@ -51,13 +70,14 @@ def image(request):
 
             # kafka 전송
             kafka_image = {
-                'image' : image['image'],
+                'image' : imagefile,
                 'label' : selected_label
             }
             producer_process("",kafka_image)
             
             # mongodb image 삭제
-            mycol.remove({"_id": ObjectId(data['image_id']) })
+            writedb.remove({"_id": ObjectId(data['image_id']) })
+            readdb.remove({"_id": ObjectId(data['image_id']) })
             return HttpResponse("hello")
         else:
             # write table의 데이터 업데이트
@@ -68,5 +88,5 @@ def image(request):
                 print(lb)
                 new_labels.append(lb)
             
-            mycol.update({"_id" : ObjectId(data['image_id'])}, {"$set" : {"labels" : new_labels, "write_count" : image['write_count'] + 1}})
+            writedb.update({"_id" : ObjectId(data['image_id'])}, {"$set" : {"labels" : new_labels, "write_count" : image['write_count'] + 1}})
             return HttpResponse("hello")
