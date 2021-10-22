@@ -26,7 +26,8 @@ def main():
     topic = LABEL_ACC_BAD_TOPIC
     
     consumer_conf = {
-        'bootstrap.servers' : 'localhost:9092',
+        # 'bootstrap.servers' : 'localhost:9092',
+        'bootstrap.servers' : '203.252.166.207:9092',
         'auto.offset.reset' : 'earliest',
         'group.id' : 'streams-wordcount'
     }
