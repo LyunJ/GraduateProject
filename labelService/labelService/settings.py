@@ -81,12 +81,8 @@ WSGI_APPLICATION = 'labelService.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'test',
-        'CLIENT': {
-            'host' : '121.130.68.170',
-            'port' : 27017
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
     }
 }
 

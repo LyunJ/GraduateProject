@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import json
@@ -37,7 +37,11 @@ def image(request):
         
         # mongodb read_count + 1
         writedb.update({"_id" : wdata['_id']}, {"$set" : {"read_count" : wdata['read_count'] + 1}})
-        return JsonResponse(responseData)
+        
+        from .catalog.form import LabelingForm
+        request.session['image_id'] = str(rdata['_id'])
+        labeling_form = LabelingForm(rdata['labels'][0],rdata['labels'][1],rdata['labels'][2])
+        return render(request,'labeling/index.html',{'form' : labeling_form})
     
     
     # POST
@@ -48,13 +52,18 @@ def image(request):
         # imageid
         # selected_label
         
-        data = json.loads(request.body)
+        from .catalog.form import LabelingForm
+        labeling_form = LabelingForm(request.POST)
+        image_id = request.session['image_id']
+        selected_label = request.POST.get('label_radio')
+    
+        print(image_id)
         
         writedb = connectMongo('write')
         readdb = connectMongo('read')
         
-        image = writedb.find_one({"_id" : ObjectId(data['image_id'])})
-        imagefile = readdb.find_one({"_id":ObjectId(data['image_id'])})['image']
+        image = writedb.find_one({"_id" : ObjectId(image_id)})
+        imagefile = readdb.find_one({"_id":ObjectId(image_id)})['image']
         
         if image['write_count'] >= 9:
             # write table에서 labeling 결과 가져오기
@@ -63,7 +72,7 @@ def image(request):
             selected_label = ""
             max_selected_count = 0
             for ld in labeling_data:
-                if ld['label'] == data['selected_label']:
+                if ld['label'] == selected_label:
                     ld['selected_count'] += 1
                 if ld['selected_count'] > max_selected_count:
                     selected_label = ld['label']
@@ -76,17 +85,21 @@ def image(request):
             producer_process("",kafka_image)
             
             # mongodb image 삭제
-            writedb.remove({"_id": ObjectId(data['image_id']) })
-            readdb.remove({"_id": ObjectId(data['image_id']) })
-            return HttpResponse("hello")
+            writedb.remove({"_id": ObjectId(image_id) })
+            readdb.remove({"_id": ObjectId(image_id) })
+            
+
+            return render(request,'labeling/result.html')
         else:
             # write table의 데이터 업데이트
             new_labels = []
             for lb in image['labels']:
-                if lb['label'] == data['selected_label']:
+                if lb['label'] == selected_label:
                     lb['selected_count'] += 1
                 print(lb)
                 new_labels.append(lb)
             
-            writedb.update({"_id" : ObjectId(data['image_id'])}, {"$set" : {"labels" : new_labels, "write_count" : image['write_count'] + 1}})
-            return HttpResponse("hello")
+            writedb.update({"_id" : ObjectId(image_id)}, {"$set" : {"labels" : new_labels, "write_count" : image['write_count'] + 1}})
+            
+            
+            return render(request,'labeling/result.html')

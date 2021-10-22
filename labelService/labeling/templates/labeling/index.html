@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Labeling Client</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'labeling/style.css' %}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Image</h1>
+      <img src="http://placehold.it/" />
+      <form method="post" action="">
+        {{ form.label_radio }}
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  </body>
+</html>
