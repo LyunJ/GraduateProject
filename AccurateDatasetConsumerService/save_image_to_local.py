@@ -6,11 +6,11 @@ from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 
 import os, sys
-sys.path.insert(0, os.path.dirname("../../ips/ips.py"))
+sys.path.insert(0, os.path.dirname("../ips/ips.py"))
 from ips import IP
 
-mongo_ip = IP('../../ips','mongo')
-kafka_ip = IP('../../ips','kafka')
+mongo_ip = IP('../ips','mongo')
+kafka_ip = IP('../ips','kafka')
 
 def msg_process(msg):    
     # 이미지 로컬에 저장

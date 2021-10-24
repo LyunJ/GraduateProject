@@ -7,10 +7,10 @@ import socket
 from pymongo import MongoClient, ReadPreference
 
 import os, sys
-sys.path.insert(0, os.path.dirname("../../ips/ips.py"))
+sys.path.insert(0, os.path.dirname("../ips/ips.py"))
 from ips import IP
-mongo_ip = IP('../../ips','mongo')
-kafka_ip = IP('../../ips','kafka')
+mongo_ip = IP('../ips','mongo')
+kafka_ip = IP('../ips','kafka')
 
 def connectMongo(selector):
     if selector == 'write':
