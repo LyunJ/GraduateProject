@@ -3,8 +3,4 @@ djangorestframework-jsonapi
 django-background-tasks
 pymongo
 confluent_kafka
-<<<<<<< HEAD
 django-cors-headers
-=======
-django-cors-headers
->>>>>>> 64c92240f2c177b3abaeaa7e3b7a10f5b55b9004
