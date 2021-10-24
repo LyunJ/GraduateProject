@@ -1,20 +1,25 @@
 import argparse
 import json
-import sys
 import time
 from confluent_kafka import Producer, Consumer, KafkaException
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 from pymongo import MongoClient, ReadPreference
 
+import os, sys
+sys.path.insert(0, os.path.dirname("../../ips/ips.py"))
+from ips import IP
+mongo_ip = IP('../../ips','mongo')
+kafka_ip = IP('../../ips','kafka')
+
 def connectMongo(selector):
     if selector == 'write':
-        write_db = MongoClient("mongodb://121.130.68.170:27020,121.130.68.170:27021,121.130.68.170:27022/?replicaSet=rs_write")
+        write_db = MongoClient(f"mongodb://{mongo_ip}:27020,{mongo_ip}:27021,{mongo_ip}:27022/?replicaSet=rs_write")
         mydb = write_db['test']
         mycol = mydb['image']
         return mycol
     elif selector == 'read':
-        read_db = MongoClient("mongodb://121.130.68.170:27017,121.130.68.170:27018,121.130.68.170:27019/?replicaSet=rs0")
+        read_db = MongoClient(f"mongodb://{mongo_ip}:27017,{mongo_ip}:27018,{mongo_ip}:27019/?replicaSet=rs0")
         mydb = read_db['test']
         mycol = mydb['image']
         return mycol
@@ -28,7 +33,7 @@ def msg_process(msg):
     label_set = []
     
     # selected_count 추가
-    label_count = len(val['labels'])
+    label_count = len(val['labels']) # ['A','B','C']
     for i in range(label_count):
         label_set.append(val['labels'][i]['label'])
         val['labels'][i]['selected_count'] = 0
@@ -67,7 +72,7 @@ def main():
     topic = args.topic
     
     consumer_conf = {
-        'bootstrap.servers' : '203.252.166.207:9092',
+        'bootstrap.servers' : f'{kafka_ip}:9092',
         'auto.offset.reset' : 'earliest',
         'group.id' : 'streams-wordcount'
     }

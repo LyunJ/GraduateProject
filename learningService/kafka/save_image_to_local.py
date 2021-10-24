@@ -1,10 +1,16 @@
 import argparse
 import json
-import sys
 import time
 from confluent_kafka import Producer, Consumer, KafkaException
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
+
+import os, sys
+sys.path.insert(0, os.path.dirname("../../ips/ips.py"))
+from ips import IP
+
+mongo_ip = IP('../../ips','mongo')
+kafka_ip = IP('../../ips','kafka')
 
 def msg_process(msg):    
     # 이미지 로컬에 저장
@@ -20,7 +26,7 @@ def main():
     topic = args.topic
     
     consumer_conf = {
-        'bootstrap.servers' : '203.252.166.207:9092',
+        'bootstrap.servers' : f'{kafka_ip}:9092',
         'auto.offset.reset' : 'earliest',
         'group.id' : 'streams-wordcount'
     }

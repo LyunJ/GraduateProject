@@ -27,11 +27,17 @@
 
 import argparse
 import json
-import sys
 import time
 from confluent_kafka import Producer, Consumer, KafkaException
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
+
+import os, sys
+sys.path.insert(0, os.path.dirname("../ips/ips.py"))
+from ips import IP
+
+mongo_ip = IP('../ips','mongo')
+kafka_ip = IP('../ips','kafka')
 
 LABEL_ACC_GOOD_TOPIC = 'good_acc_label'
 LABEL_ACC_BAD_TOPIC = 'bad_acc_label'
@@ -57,7 +63,7 @@ ACC_STANDARD = 80
 
 def producer_process(key,msg):
     producer_conf = {
-        'bootstrap.servers' : '203.252.166.207:9092',
+        'bootstrap.servers' : f'{kafka_ip}:9092',
         'compression.codec' : 'gzip'
     }
     try:

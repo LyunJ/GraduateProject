@@ -5,20 +5,26 @@ from bson.objectid import ObjectId
 import json
 from .execFile.getDataFromKafkaAndSendToKafka import producer_process
 
+import os, sys
+sys.path.insert(0, os.path.dirname("../ips/ips.py"))
+from ips import IP
+mongo_ip = IP('../ips','mongo')
+kafka_ip = IP('../ips','kafka')
+
 def connectMongo(selector):
     if selector == 'write':
-        write_db = MongoClient(['121.130.68.170:27020','121.130.68.170:27021','121.130.68.170:27022'],replicaset='rs_write')
+        write_db = MongoClient([f'{mongo_ip}:27020',f'{mongo_ip}:27021',f'{mongo_ip}:27022'],replicaset='rs_write')
         mydb = write_db['test']
         mycol = mydb['image']
         return write_db,mycol
     elif selector == 'read':
-        read_db = MongoClient(['121.130.68.170:27017','121.130.68.170:27018','121.130.68.170:27019'],replicaset='rs0')
+        read_db = MongoClient([f'{mongo_ip}:27017',f'{mongo_ip}:27018',f'{mongo_ip}:27019'],replicaset='rs0')
         mydb = read_db['test']
         mycol = mydb['image']
         return read_db,mycol
     elif selector == 'test':
-        write_db = MongoClient(['121.130.68.170:27020','121.130.68.170:27021','121.130.68.170:27022'],replicaset='rs_write')
-        read_db = MongoClient(['121.130.68.170:27017','121.130.68.170:27018','121.130.68.170:27019'],replicaset='rs0')
+        write_db = MongoClient([f'{mongo_ip}:27020',f'{mongo_ip}:27021',f'{mongo_ip}:27022'],replicaset='rs_write')
+        read_db = MongoClient([f'{mongo_ip}:27017',f'{mongo_ip}:27018',f'{mongo_ip}:27019'],replicaset='rs0')
         wdb = write_db['test']
         wcol = wdb['test']
         rdb = read_db['test']
