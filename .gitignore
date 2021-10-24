@@ -13,3 +13,5 @@ labelsService/labeling/__pycache__/
 labelsService/labeling/migrations/
 
 eureka-microservices/
+
+ips/ips.json
