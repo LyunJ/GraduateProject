@@ -5,7 +5,7 @@ let rawdata = fs.readFileSync("../ips/ips.json");
 let student = JSON.parse(rawdata);
 let ip = student["kafka"];
 
-let url = "http://" + ip + ":18002/labeling/test";
+let url = "http://" + ip + ":8002/labeling/test";
 
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
