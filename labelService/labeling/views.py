@@ -140,7 +140,7 @@ def test(request):
         }
         
         # mongodb read_count + 1
-        writedb.update({"_id" : wdata['_id']}, {"$set" : {"read_count" : wdata['read_count'] + 1}})
+        writedb.update({"_id" : wdata['_id']}, {"$inc" : {"read_count" : 1}})
         
         from .catalog.form import LabelingForm
         # request.session['image_id'] = str(rdata['_id'])
@@ -202,7 +202,8 @@ def test(request):
             print(lb)
             new_labels.append(lb)
         
-        writedb.update({"_id" : ObjectId(image_id)}, {"$set" : {"labels" : new_labels, "write_count" : image['write_count'] + 1}})
+        # writedb.update({"_id" : ObjectId(image_id)}, {"$set" : {"labels" : new_labels, "write_count" : image['write_count'] + 1}})
+        writedb.update({"_id" : ObjectId(image_id)}, {"$set" : {"labels" : new_labels}, "$inc" : {"write_count" : 1}})
         
         
         return render(request,'labeling/result.html')
