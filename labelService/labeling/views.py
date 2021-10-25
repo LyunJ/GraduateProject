@@ -143,7 +143,7 @@ def test(request):
         writedb.update({"_id" : wdata['_id']}, {"$set" : {"read_count" : wdata['read_count'] + 1}})
         
         from .catalog.form import LabelingForm
-        request.session['image_id'] = str(rdata['_id'])
+        # request.session['image_id'] = str(rdata['_id'])
         labeling_form = LabelingForm(rdata['labels'][0],rdata['labels'][1],rdata['labels'][2])
         
         
@@ -156,15 +156,18 @@ def test(request):
 
         # from .catalog.form import LabelingForm
         # labeling_form = LabelingForm(request.POST)
-        image_id = request.session['image_id']
+        # image_id = request.session['image_id']
+        # 부하 테스트에서는 세션을 만들지 않기 때문에 request.body에서 받아옴
+        data = json.loads(request.body)
+        image_id = data['image_id']
+        selected_label = data['selected_label']
         # selected_label = request.POST.get('label_radio')
-    
-        print(image_id)
         
         writedb,readdb = connectMongo('test')
         
         image = writedb.find_one({"_id" : ObjectId(image_id)})
         imagefile = readdb.find_one({"_id":ObjectId(image_id)})['image']
+        
         
         # if image['write_count'] >= 9:
         #     # write table에서 labeling 결과 가져오기
@@ -195,7 +198,7 @@ def test(request):
         #     return render(request,'labeling/result.html')
         # else:
         # write table의 데이터 업데이트
-        selected_label = 'A'
+        # selected_label = 'A'
         new_labels = []
         for lb in image['labels']:
             if lb['label'] == selected_label:
