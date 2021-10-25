@@ -7,6 +7,7 @@ model-server/
 learningService/learningService/__pycache__/
 learningService/deeplearning/__pycache__/
 learningService/deeplearning/migrations/
+learningService/deeplearning/parameterFile/
 
 labelsService/labelsService/__pycache__/
 labelsService/labeling/__pycache__/
@@ -15,3 +16,4 @@ labelsService/labeling/migrations/
 eureka-microservices/
 
 ips/ips.json
+
