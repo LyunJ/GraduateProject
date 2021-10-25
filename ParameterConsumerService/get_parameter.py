@@ -1,7 +1,7 @@
 import argparse
 import json
 import time
-from confluent_kafka import Producer, Consumer, KafkaException
+from confluent_kafka import Producer, Consumer, KafkaException, KafkaError
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 from pymongo import MongoClient
@@ -22,6 +22,7 @@ mycol = mydb['image']
 
 def msg_process(msg):  
     # parameter 모델에 적용  
+    print("msg_process(msg) is invoked in get_parameter.py")
     print(msg)
 
 def main():

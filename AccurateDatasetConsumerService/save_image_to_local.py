@@ -14,6 +14,7 @@ kafka_ip = IP('../ips','kafka')
 
 def msg_process(msg):    
     # 이미지 로컬에 저장
+    print("msg_process(msg) is invoked in save_image_to_local.py")
     print(msg)
 
 def main():

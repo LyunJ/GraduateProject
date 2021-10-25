@@ -1,0 +1,14 @@
+FROM python:3.7.7
+
+# copy code
+WORKDIR /usr/src
+COPY InaccurateDatasetConsumerService app
+COPY ips ips
+
+# install module
+COPY requirements/RQ_InaccurateDatasetConsumerService.txt /tmp/requirements.txt
+RUN python3 -m pip install -r /tmp/requirements.txt
+
+# run
+WORKDIR /usr/src/app
+CMD python save_data_to_mongodb.py bad_acc_label

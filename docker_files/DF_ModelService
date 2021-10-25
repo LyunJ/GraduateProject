@@ -1,0 +1,15 @@
+FROM python:3.7.7
+
+# copy code
+WORKDIR /usr/src
+COPY modelService app
+COPY ips ips
+
+# install module
+COPY requirements/RQ_ModelService.txt /tmp/requirements.txt
+RUN python3 -m pip install -r /tmp/requirements.txt
+
+# run
+WORKDIR /usr/src/app
+EXPOSE 8001
+CMD python manage.py runserver 0.0.0.0:8001

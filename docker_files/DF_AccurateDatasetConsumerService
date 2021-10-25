@@ -1,0 +1,14 @@
+FROM python:3.7.7
+
+# copy code
+WORKDIR /usr/src
+COPY AccurateDatasetConsumerService app
+COPY ips ips
+
+# install module
+COPY requirements/RQ_AccurateDatasetConsumerService.txt /tmp/requirements.txt
+RUN python3 -m pip install -r /tmp/requirements.txt
+
+# run
+WORKDIR /usr/src/app
+CMD python save_image_to_local.py good_acc_label

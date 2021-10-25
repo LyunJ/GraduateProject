@@ -1,0 +1,15 @@
+FROM python:3.7.7
+
+# copy code
+WORKDIR /usr/src
+COPY learningService app
+COPY ips ips
+
+# install module
+COPY requirements/RQ_LearningService.txt /tmp/requirements.txt
+RUN python3 -m pip install -r /tmp/requirements.txt
+
+# run
+WORKDIR /usr/src/app
+EXPOSE 8003
+CMD python manage.py runserver 0.0.0.0:8003

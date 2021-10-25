@@ -3,3 +3,4 @@ djangorestframework-jsonapi
 django-background-tasks
 pymongo
 django-cors-headers
+confluent_kafka
