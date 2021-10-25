@@ -150,6 +150,10 @@ def test(request):
         return render(request,'labeling/index.html',{'form' : labeling_form})
     
     if request.method == 'POST':
+
+        for key in request.session.keys():
+            print("key:=>" + request.session[key])
+
         # from .catalog.form import LabelingForm
         # labeling_form = LabelingForm(request.POST)
         image_id = request.session['image_id']
