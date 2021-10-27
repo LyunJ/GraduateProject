@@ -57,7 +57,7 @@ let rawdata = fs.readFileSync("../ips/ips.json");
 let student = JSON.parse(rawdata);
 let ip = student["kafka"];
 
-let url = "http://" + ip + ":8002/labeling/test";
+let url = "http://localhost:8002/labeling/test";
 
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,25 +65,69 @@ function timeout(ms) {
 var xhr = [];
 var nice_count = 0;
 async function main() {
-  var xmlHttp = new XMLHttpRequest();
-  for (let i = 1; i <= 100000; i++) {
+  for (let i = 1; i <= 100; i++) {
+    xhr[i] = new XMLHttpRequest();
+    xhr[i].onreadystatechange = function (e) {
+      if (xhr[i].readyState === 4) {
+        if (xhr[i].status === 200) {
+          nice_count += 1;
+          //   console.log(xhr[i].responseText);
+          console.log("[" + i + "] : NICE" + nice_count);
+        } else {
+          console.log(
+            `xhr[${i}].readyState = 4 && xhr[${i}].status != 200 ` +
+              xhr[i].status
+          );
+          console.error(xhr[i].onerror);
+        }
+      } else {
+        if (xhr[i].status === 200) {
+          //   console.log(xhr[i].responseText);
+          console.log(
+            "[" +
+              i +
+              "] xhr[i].readyState != 4" +
+              "(" +
+              xhr[i].readyState +
+              ")" +
+              " && xhr[i].status = 200(" +
+              xhr[i].status +
+              ")"
+          );
+        } else {
+          console.log(
+            "[" +
+              i +
+              "] xhr[i].readyState != 4" +
+              "(" +
+              xhr[i].readyState +
+              ")" +
+              " && xhr[i].status != 200(" +
+              xhr[i].status +
+              ")" +
+              xhr[i].statusText
+          );
+        }
+      }
+    };
+
     // GET test
-    xmlHttp.open("GET", url, true); // true for asynchronous
-    xmlHttp.send(null);
-    console.log("GET " + i);
+    xhr[i].open("GET", url, true); // true for asynchronous
+    xhr[i].send(null);
+    // console.log("GET " + i);
 
     // POST test
-    xmlHttp.open("POST", url, true); // true for asynchronous
-    xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xmlHttp.send(
-      JSON.stringify({
-        image_id: "615feadea8601b26f6ef5d7a",
-        selected_label: "A",
-      })
-    );
-    console.log("POST " + i);
+    // xmlHttp.open("POST", url, true); // true for asynchronous
+    // xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    // xmlHttp.send(
+    //   JSON.stringify({
+    //     image_id: "615feadea8601b26f6ef5d7a",
+    //     selected_label: "A",
+    //   })
+    // );
+    // console.log("POST " + i);
 
-    await timeout(100);
+    await timeout(1);
   }
 }
 
