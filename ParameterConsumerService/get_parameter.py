@@ -45,8 +45,11 @@ def main():
     running = True
     try:
         consumer.subscribe([args.topic])
+        
         while running:
+            
             msg = consumer.poll(1)
+            
             if msg is None:
                 continue
             
