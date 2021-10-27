@@ -138,7 +138,7 @@ def test(request):
             "image" : rdata['image'],
             "labels" : rdata['labels']
         }
-        
+        print(wdata['read_count'])
         # mongodb read_count + 1
         writedb.update({"_id" : wdata['_id']}, {"$inc" : {"read_count" : 1}})
         
