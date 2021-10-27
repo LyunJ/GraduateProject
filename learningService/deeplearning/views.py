@@ -23,14 +23,15 @@ producer_conf = {
 PARAMETER_LABEL = 'parameter'
 
 def getParameterFile(fileName):
-    result = torch.load(f'./deeplearning/parameterFile/{fileName}')
-    return result
+    file = open(f'./deeplearning/parameterFile/{fileName}','rb')
+    # result = bytearray(file.read())
+    return file.read()
 
 def parameter(request):
     if request.method == 'GET':
         key = ""
         
-        model = getParameterFile('best.pt')
+        data = getParameterFile('best.pt')
         
         producer = Producer(producer_conf)
         producer.produce(PARAMETER_LABEL, key=key, value = data)

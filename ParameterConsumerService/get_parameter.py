@@ -16,14 +16,11 @@ kafka_ip = IP('../ips','kafka')
 LABEL_ACC_GOOD_TOPIC = 'good_acc_label'
 LABEL_ACC_BAD_TOPIC = 'bad_acc_label'
 
-db = MongoClient(f"mongodb://{mongo_ip}:27017/")
-mydb = db['test']
-mycol = mydb['image']
-
 def msg_process(msg):  
     # parameter 모델에 적용  
-    print("msg_process(msg) is invoked in get_parameter.py")
-    print(msg)
+
+    file = open('test.pt','wb')
+    file.write(msg.value())
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -37,7 +34,8 @@ def main():
     consumer_conf = {
         'bootstrap.servers' : f'{kafka_ip}:9092',
         'auto.offset.reset' : 'earliest',
-        'group.id' : 'streams-wordcount'
+        'group.id' : 'streams-wordcount',
+        'fetch.message.max.bytes' : '100000000'
     }
     
     consumer = Consumer(consumer_conf)
