@@ -1,7 +1,7 @@
 import argparse
 import json
 import time
-from confluent_kafka import Producer, Consumer, KafkaException
+from confluent_kafka import Producer, Consumer, KafkaException, KafkaError
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 from pymongo import MongoClient, ReadPreference

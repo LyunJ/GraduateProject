@@ -4,7 +4,6 @@ from confluent_kafka import Producer, Consumer, KafkaException
 from confluent_kafka.serialization import Deserializer, Serializer
 import json
 
-import torch
 # Create your views here.
 
 import os, sys
