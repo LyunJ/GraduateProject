@@ -32,6 +32,7 @@ from confluent_kafka import Producer, Consumer, KafkaException
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 
+# ip 주소 가져오기
 import os, sys
 sys.path.insert(0, os.path.dirname("../ips/ips.py"))
 from ips import IP
@@ -39,40 +40,26 @@ from ips import IP
 mongo_ip = IP('../ips','mongo')
 kafka_ip = IP('../ips','kafka')
 
+# topic name
 LABEL_ACC_GOOD_TOPIC = 'good_acc_label'
 LABEL_ACC_BAD_TOPIC = 'bad_acc_label'
 
+# bad/good accuracy 기준
 ACC_STANDARD = 80
 
-# def msg_process(msg):    
-#     # Print the current time and the message.
-#     time_start = time.strftime("%Y-%m-%d %H:%M:%S")
-#     print(time_start)
-    
-#     newVal = {
-#         'image' : '',
-#         'label' : '' 
-#     }
-#     key = msg.key()
-#     val = msg.value()
-#     newVal['image'] = str(val)
-#     newVal['label'] = 'temp'            # 모델의 라벨링를 대신함
-
-#     msgValueAddedLabel = json.dumps(newVal)
-#     producer_process(key,msgValueAddedLabel)
 
 def producer_process(key,msg):
+    # producer configuration
     producer_conf = {
         'bootstrap.servers' : f'{kafka_ip}:9092',
         'compression.codec' : 'gzip'
     }
     try:
         producer = Producer(producer_conf)
-        for lb in msg['labels']:
-            if lb['accuracy'] >= ACC_STANDARD:
-                print(lb['accuracy'])
+        for label in msg['labels']:
+            if label['accuracy'] >= ACC_STANDARD:
                 # good_acc_label message 구조로 바꿔줌
-                msg['label'] = lb['label']
+                msg['label'] = label['label']
                 msg.pop('labels')
                 # kafka로 전송
                 producer.produce(LABEL_ACC_GOOD_TOPIC, key=key, value = json.dumps(msg))
@@ -82,56 +69,8 @@ def producer_process(key,msg):
         for i in range(len(msg['labels'])):
             msg['labels'][i].pop('accuracy')
         # kafka로 전송
-        print(msg)
         producer.produce(LABEL_ACC_BAD_TOPIC, key=key, value = json.dumps(msg))
         producer.flush()
     except:
         print('error')
         pass
-
-# def main():
-#     parser = argparse.ArgumentParser(description=__doc__)
-#     parser.add_argument('topic', type=str,
-#                         help='Name of the Kafka topic to stream.')
-    
-#     args = parser.parse_args()
-    
-#     topic = args.topic
-    
-#     consumer_conf = {
-#         'bootstrap.servers' : 'localhost:9092',
-#         'auto.offset.reset' : 'earliest',
-#         'group.id' : 'streams-wordcount'
-#     }
-    
-#     consumer = Consumer(consumer_conf)
-    
-#     running = True
-#     try:
-#         consumer.subscribe([args.topic])
-#         while running:
-#             msg = consumer.poll(1)
-#             if msg is None:
-#                 continue
-            
-#             if msg.error():
-#                 if msg.error().code() == KafkaError._PARTITION_EOF:
-#                     # End of partition event
-#                     sys.stderr.write('%% %s [%d] reached end at offset %d\n' %
-#                                      (msg.topic(), msg.partition(), msg.offset()))
-#                 elif msg.error().code() == KafkaError.UNKNOWN_TOPIC_OR_PART:
-#                     sys.stderr.write('Topic unknown, creating %s topic\n' %
-#                                      (args.topic))
-#                 elif msg.error():
-#                     raise KafkaException(msg.error())
-#             else:
-#                 msg_process(msg)
-        
-#     except KeyboardInterrupt:
-#         pass
-    
-#     finally:
-#         consumer.close()
-
-# if __name__ == "__main__":
-#     main()

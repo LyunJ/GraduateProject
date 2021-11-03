@@ -1,7 +1,7 @@
 import argparse
 import json
 import time
-from confluent_kafka import Producer, Consumer, KafkaException
+from confluent_kafka import Producer, Consumer, KafkaException, KafkaError
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 from pymongo import MongoClient, ReadPreference
@@ -16,13 +16,8 @@ def connectMongo(selector):
     if selector == 'write':
         write_db = MongoClient(f"mongodb://{mongo_ip}:27020,{mongo_ip}:27021,{mongo_ip}:27022/?replicaSet=rs_write")
         mydb = write_db['test']
-        mycol = mydb['image']
-        return mycol
-    elif selector == 'read':
-        read_db = MongoClient(f"mongodb://{mongo_ip}:27017,{mongo_ip}:27018,{mongo_ip}:27019/?replicaSet=rs0")
-        mydb = read_db['test']
-        mycol = mydb['image']
-        return mycol
+        mycol = mydb['test_image']
+        return write_db,mycol
     else:
         return -1
 
@@ -37,46 +32,34 @@ def msg_process(msg):
     for i in range(label_count):
         label_set.append(val['labels'][i]['label'])
         val['labels'][i]['selected_count'] = 0
-    
+
+
     # mongoDB저장용 객체
     mongoWriteDoc = {
+        'image_rowkey' : val['image_rowkey'],
         'labels' : val['labels'],
         'read_count' : 0,
         'write_count' : 0
     }
-    mongoReadDoc = {
-        'image' : val['image'],
-        'labels' : label_set
-    }
-    
+
     # mongodb 연결
-    writedb = connectMongo('write')
-    readdb = connectMongo('read')
-    
-    docResult = readdb.insert_one(mongoReadDoc)
-    try:
-        mongoWriteDoc['_id'] = ObjectId(docResult.inserted_id)
-        print('object')
-    except:
-        mongoWriteDoc['_id'] = docResult.inserted_id
-        print('string')
+    write_client, writedb = connectMongo('write')
     writedb.insert_one(mongoWriteDoc)
+    write_client.close()
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('topic', type=str,
                         help='Name of the Kafka topic to stream.')
-    
     args = parser.parse_args()
-    
     topic = args.topic
-    
+
+
     consumer_conf = {
         'bootstrap.servers' : f'{kafka_ip}:9092',
         'auto.offset.reset' : 'earliest',
         'group.id' : 'streams-wordcount'
     }
-    
     consumer = Consumer(consumer_conf)
     
     running = True

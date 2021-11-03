@@ -1,7 +1,7 @@
 import argparse
 import json
 import time
-from confluent_kafka import Producer, Consumer, KafkaException
+from confluent_kafka import Producer, Consumer, KafkaException, KafkaError
 from confluent_kafka.serialization import Deserializer, Serializer
 import socket
 
@@ -9,21 +9,28 @@ import os, sys
 sys.path.insert(0, os.path.dirname("../ips/ips.py"))
 from ips import IP
 
-mongo_ip = IP('../ips','mongo')
+hbase_ip = IP('../ips','hbase')
 kafka_ip = IP('../ips','kafka')
+
+import happybase
+import base64
+def getImageFromHbase(rowkey):
+    conn = happybase.Connection(f'{hbase_ip}',9090,autoconnect=True)
+    
+    result = conn.table('test').row(rowkey)[b'data:1']
+    return result
 
 def msg_process(msg):    
     # 이미지 로컬에 저장
-    print("msg_process(msg) is invoked in save_image_to_local.py")
-    print(msg)
+    image = getImageFromHbase(json.loads(msg.value())['image_rowkey'])
+    with open('tmp.png','wb') as f:
+        f.write(base64.b64decode(image))
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('topic', type=str,
                         help='Name of the Kafka topic to stream.')
-    
     args = parser.parse_args()
-    
     topic = args.topic
     
     consumer_conf = {
@@ -31,7 +38,6 @@ def main():
         'auto.offset.reset' : 'earliest',
         'group.id' : 'streams-wordcount'
     }
-    
     consumer = Consumer(consumer_conf)
     
     running = True
