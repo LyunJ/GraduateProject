@@ -16,8 +16,13 @@ import happybase
 import cv2
 
 # 딥러닝 팀
-# 모델함수에 이미지를 넣었을 때 return의 구조로 출력될 수 있도록 코드 짜기
+# 모델함수에 이미지를 넣었을 때 getLabelAndAccuracyTmp return의 구조로 출력될 수 있도록 코드 짜기
+# 모델 파일 경로는 docker 공유 폴더 테스트 후 나오기 때문에 일단 임의로 테스트
 def getLabelAndAccuracy(image):
+    
+    return 
+
+def getLabelAndAccuracyTmp(image):
     
     acc1  =random.randrange(60,100)
     acc2 = (100 - acc1)/2
@@ -69,7 +74,7 @@ def labeling(request):
         sendImageToHbase(image,rowkey)
         
         # model로부터 라벨 후보와 accuracy받아오기
-        labels = getLabelAndAccuracy(image)
+        labels = getLabelAndAccuracyTmp(image)
         labeledImage = {
             'image_rowkey' : rowkey,
             'labels' : labels
@@ -80,6 +85,7 @@ def labeling(request):
 
 def modelUpdate(request):
     if request.method == 'GET':
-        # 딥러닝팀 모델 업데이트 코드
-        # 파라미터 파일 경로는 docker 공유 폴더 테스트 후 나오기 때문에 일단 임의로 테스트
+        
+        
+
         return HttpResponse("Model Update Complete")
