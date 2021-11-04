@@ -12,6 +12,7 @@ import base64
 import os, sys
 sys.path.insert(0, os.path.dirname("../ips/ips.py"))
 from ips import IP
+sys.path.append('./deeplearning')
 
 hadoop_ip = IP('../ips','hadoop')
 kafka_ip = IP('../ips','kafka')
@@ -23,12 +24,17 @@ producer_conf = {
 
 PARAMETER_LABEL = 'parameter'
 
-# 이전 pt파일 삭제 후 새로운 pt파일 저장
+import classification
+
+model = classification.classificationModel('./deeplearning/parameterFile')
+
+# 이전 pt파일 삭제 후 새로운 pt파일 저장 
+# zip으로 드린다고 했으므로 변경
 from hdfs import InsecureClient
 def save_to_hdfs(data):
     client_hdfs = InsecureClient(f'http://{hadoop_ip}:9870')
-    client_hdfs.delete('/tmp/test_new.pt')
-    client_hdfs.write('/tmp/test_new.pt',data=data)
+    client_hdfs.delete('/tmp/model.zip')
+    client_hdfs.write('/tmp/model.zip',data=data)
 
 # byte[] 타입으로 파일 읽어오기
 def getParameterFile(fileName):
@@ -39,7 +45,7 @@ def getParameterFile(fileName):
 def parameter(request):
     if request.method == 'GET':
         # parameter 파일 load 후 hadoop에 업로드
-        data = getParameterFile('best.pt')
+        data = getParameterFile('model.zip')
         save_to_hdfs(data)
         
         # hdfs url을 kafka의 parameter topic에 전송
@@ -56,4 +62,6 @@ def trainingTest(request):
     if request.method == 'GET':
         # 모델 학습 개시
         # 모델 파일은 ./deeplaerning/parameterFile 경로로 저장 (이 파일의 디렉토리에 있음)
+        model.train(data_dir='')
+        model.zipmodel('./deeplearning/parameterFile')
         return HttpResponse("training complete")

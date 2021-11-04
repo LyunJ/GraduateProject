@@ -8,13 +8,17 @@ import random
 # ip 주소 받아오기
 import os, sys
 sys.path.insert(0, os.path.dirname("../ips/ips.py"))
+sys.path.append('./apis')
 from ips import IP
+import classification
+from pathlib import Path
 
 hbase_ip = IP('../ips','hbase')
 
 import happybase
-import cv2
+from PIL import Image
 
+model = classification.labeling('./apis/yolo')
 
 def getLabelAndAccuracyTmp(image):
     # 딥러닝 팀
@@ -35,7 +39,9 @@ def getLabelAndAccuracyTmp(image):
     #         'accuracy' : acc3
     #     },
     #     ]
-    return ""
+    result = model.simple_predict(image)
+    result = [[{'label' : k, 'accuracy': v} for k, v in zip(classification.label_to_str.values(), r)] for r in result]
+    return result
 
 def getLabelAndAccuracy(image):
     
@@ -89,7 +95,7 @@ def labeling(request):
         # model로부터 라벨 후보와 accuracy받아오기
         labels = getLabelAndAccuracyTmp(image)
         labeledImage = {
-            'image_rowkey' : rowkey,
+            'image_rowkey' : "rowkey",
             'labels' : labels
         }
         
@@ -99,8 +105,11 @@ def labeling(request):
 def labelingTest(request):
     if request.method == 'GET':
         # request body에서 base64로 인코딩된 image data 가져오기
-        image = json.loads(request.body)['image']
+        # image = json.loads(request.body)['image']
         
+        # test용
+        image = Image.open(r'C:\GProjects\data\images\train\s01000200.jpg')
+
         # model로부터 라벨 후보와 accuracy받아오기
         labels = getLabelAndAccuracyTmp(image)
         labeledImage = {
@@ -111,6 +120,5 @@ def labelingTest(request):
 
 def modelUpdate(request):
     if request.method == 'GET':
-        
-        
+        model.update_model()
         return HttpResponse("Model Update Complete")
