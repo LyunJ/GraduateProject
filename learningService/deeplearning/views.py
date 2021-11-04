@@ -50,6 +50,10 @@ def parameter(request):
 
 def training(request):
     if request.method == 'GET':
+        return HttpResponse("training complete")
+
+def trainingTest(request):
+    if request.method == 'GET':
         # 모델 학습 개시
-        # 파라미터 파일은 ./deeplaerning/parameterFile 경로로 저장 (이 파일의 디렉토리에 있음)
+        # 모델 파일은 ./deeplaerning/parameterFile 경로로 저장 (이 파일의 디렉토리에 있음)
         return HttpResponse("training complete")
