@@ -47,3 +47,9 @@ def parameter(request):
         producer.produce(PARAMETER_LABEL, key="", value = json.dumps({"url":"/tmp/test_new.pt"}))
         producer.flush()
         return HttpResponse("Thank you")
+
+def training(request):
+    if request.method == 'GET':
+        # 모델 학습 개시
+        # 파라미터 파일은 ./deeplaerning/parameterFile 경로로 저장 (이 파일의 디렉토리에 있음)
+        return HttpResponse("training complete")

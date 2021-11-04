@@ -77,3 +77,9 @@ def labeling(request):
         
         producer_process("",labeledImage)
         return JsonResponse(labeledImage)
+
+def modelUpdate(request):
+    if request.method == 'GET':
+        # 딥러닝팀 모델 업데이트 코드
+        # 파라미터 파일 경로는 docker 공유 폴더 테스트 후 나오기 때문에 일단 임의로 테스트
+        return HttpResponse("Model Update Complete")
