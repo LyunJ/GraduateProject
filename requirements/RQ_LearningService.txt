@@ -6,3 +6,4 @@ confluent_kafka
 django-cors-headers
 requests
 torch
+hdfs
