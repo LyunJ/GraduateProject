@@ -57,7 +57,8 @@ let rawdata = fs.readFileSync("../ips/ips.json");
 let student = JSON.parse(rawdata);
 let ip = student["kafka"];
 
-let url = "http://" + ip + ":18002/labeling/test";
+// let url = "http://" + ip + ":18002/labeling/test";
+let url = "http://" + ip + ":28000/label-service/labeling/test";
 
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -66,7 +67,7 @@ var xhr = [];
 var nice_count = 0;
 async function main() {
   var xhr = new XMLHttpRequest();
-  for (let i = 1; i <= 2000; i++) {
+  for (let i = 1; i <= 1000; i++) {
     // GET test
     xhr.open("GET", url, true); // true for asynchronous
     xhr.send(null);
@@ -83,7 +84,7 @@ async function main() {
     );
     console.log("POST " + i);
 
-    await timeout(100);
+    await timeout(500);
 
     // * 400m의 70%인 280m의 배수에 도달할 때마다 SCALING 수행
     // 1000ms : (REPLICA = 1개), (CPU = 90m), (TARGET = 23%/70%)
