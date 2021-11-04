@@ -13,6 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+
+# 우리가 해야 할것
+# 1. classification 모델 학습(내껀 학습시키지 않음)
+# 2. model save해서 넘겨주기
+
 from django.contrib import admin
 from django.urls import path, include
 
