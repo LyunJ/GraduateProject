@@ -7,3 +7,4 @@ django-cors-headers
 requests
 torch
 hdfs
+numpy

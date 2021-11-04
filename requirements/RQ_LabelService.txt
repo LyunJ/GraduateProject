@@ -4,3 +4,4 @@ django-background-tasks
 pymongo
 confluent_kafka
 django-cors-headers
+happybase

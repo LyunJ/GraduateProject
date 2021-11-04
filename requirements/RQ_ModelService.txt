@@ -4,3 +4,5 @@ django-background-tasks
 pymongo
 django-cors-headers
 confluent_kafka
+happybase
+opencv-python-headless
