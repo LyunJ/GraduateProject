@@ -7,4 +7,3 @@ django-cors-headers
 happybase
 pillow
 numpy
-base64
