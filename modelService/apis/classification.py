@@ -126,18 +126,21 @@ label_to_str = {
 str_to_label = {v:k for k, v in label_to_str.items()}
 
 weight_path = './apis/yolo/model0.pt'
-model_dir = './apis/classification/'
+# model_dir = './apis/classification/'
+model_dir = '../parameter' # docker 환경에 맞춤
 
 class labeling():
     def __init__(self, output_dir):
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
         output_dir = Path(output_dir)
 
         # Tensorflow의 GPU 메모리 할당 문제를 해결해주는 코드(Tensorflow >= 2.0.0)
-        gpu_devices = tf.config.experimental.list_physical_devices('GPU')
-        for device in gpu_devices:
-            tf.config.experimental.set_memory_growth(device, True)
+        # gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+        # for device in gpu_devices:
+        #     tf.config.experimental.set_memory_growth(device, True)
         
-        self.device = torch.device('cuda:0')
+        # self.device = torch.device('cuda:0')
+        self.device = torch.device('cpu')
 
         with zipfile.ZipFile(Path(model_dir) / 'model.zip') as zip:
             zip.extractall(Path(model_dir))
@@ -199,7 +202,7 @@ class labeling():
         classification_img = np.array(classification_img)
         classification_img.reshape([-1, 64, 64, 3])
         result = self.model1(classification_img)
-        return result
+        return result.numpy().tolist(), classification_img
         
     def resize_img(self, img, result, lst):
         if result['name'] == 'traffic_sign':
@@ -223,6 +226,4 @@ class labeling():
 
 if __name__ == "__main__":
     label = labeling('./output')
-    labeling.predict(r'C:\GProjects\data\images\train')
-
-# Create your models here.
+    labeling.predict(r'C:\Users\tedle\work\project\graduate\s01000200.jpg')

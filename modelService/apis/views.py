@@ -39,30 +39,16 @@ def getLabelAndAccuracyTmp(image):
     #         'accuracy' : acc3
     #     },
     #     ]
-    result = model.simple_predict(image)
+    result, images = model.simple_predict(image)
     result = [[{'label' : k, 'accuracy': v} for k, v in zip(classification.label_to_str.values(), r)] for r in result]
-    return result
+    result = list(map(lambda x : list(filter(lambda x: x['accuracy'] != 0,x)),result))
+    return result, images
 
 def getLabelAndAccuracy(image):
-    
-    acc1  =random.randrange(60,100)
-    acc2 = (100 - acc1)/2
-    acc3 = (100 - acc1)/2
-    
-    return [
-        {
-            'label' : 'A',
-            'accuracy' : acc1
-        },
-        {
-            'label' : 'B',
-            'accuracy' : acc2
-        },
-        {
-            'label' : 'C',
-            'accuracy' : acc3
-        },
-    ]
+    result, images = model.simple_predict(image)
+    result = [[{'label' : k, 'accuracy': v} for k, v in zip(classification.label_to_str.values(), r)] for r in result]
+    result = list(map(lambda x : list(filter(lambda x: x['accuracy'] != 0,x)),result))
+    return result, images
 
 # rowkey로 구분될 image를 저장
 def sendImageToHbase(image,rowkey):
@@ -86,21 +72,33 @@ def generateRowKey(image):
     result = unique_hash[:5] + unique_time + unique_image_1 + unique_image_2
     return result
 
+
+import base64
+import io
 # /api/labeling
 def labeling(request):
     if request.method == 'GET':
         # request body에서 base64로 인코딩된 image data 가져오기
-        image = json.loads(request.body)['image']
-        
+        image_body = json.loads(request.body)['image']
+        image_bytes = base64.b64decode(image_body)
+        image_file = io.BytesIO(image_bytes)
+        image = Image.open(image_file)
         # model로부터 라벨 후보와 accuracy받아오기
-        labels = getLabelAndAccuracyTmp(image)
-        labeledImage = {
-            'image_rowkey' : "rowkey",
-            'labels' : labels
-        }
+        labels, images = getLabelAndAccuracy(image)
+        labeledImages = []
         
-        producer_process("",labeledImage)
-        return JsonResponse(labeledImage)
+        for label,i in zip(labels,images):
+            print(i.dtype)
+            img = base64.b64encode(i).decode()
+            rowkey = generateRowKey(img)
+            sendImageToHbase(img,rowkey)
+            labeledImage={
+                'image_rowkey' : rowkey,
+                'labels' : label
+            }
+            labeledImages.append(labeledImage)
+            producer_process("",labeledImage)
+        return JsonResponse({"labeledImages":labeledImages})
 
 def labelingTest(request):
     if request.method == 'GET':
@@ -108,15 +106,17 @@ def labelingTest(request):
         # image = json.loads(request.body)['image']
         
         # test용
-        image = Image.open(r'C:\GProjects\data\images\train\s01000200.jpg')
+        image = Image.open(r'C:\Users\tedle\work\project\graduate\s01000200.jpg')
 
         # model로부터 라벨 후보와 accuracy받아오기
-        labels = getLabelAndAccuracyTmp(image)
-        labeledImage = {
-            'image_rowkey' : "rowkey",
-            'labels' : labels
-        }
-        return JsonResponse(labeledImage)
+        labels, images = getLabelAndAccuracyTmp(image)
+        labeledImages = []
+        for l,i in zip(labels,images):
+            labeledImages.append({
+            'image_rowkey' : base64.b64encode(i).decode(),
+            'labels' : l
+        })
+        return JsonResponse({"labeledImages" : labeledImages})
 
 def modelUpdate(request):
     if request.method == 'GET':

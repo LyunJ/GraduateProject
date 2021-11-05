@@ -45,9 +45,9 @@ LABEL_ACC_GOOD_TOPIC = 'good_acc_label'
 LABEL_ACC_BAD_TOPIC = 'bad_acc_label'
 
 # bad/good accuracy 기준
-ACC_STANDARD = 80
+ACC_STANDARD = 0.99
 
-
+import random
 def producer_process(key,msg):
     # producer configuration
     producer_conf = {
@@ -57,6 +57,9 @@ def producer_process(key,msg):
     try:
         producer = Producer(producer_conf)
         for label in msg['labels']:
+            # 거의 다 정확히 나와서 랜덤으로 bad_acc_label로 보내버림
+            # if random.randrange(1,100) > 80:
+            #     break
             if label['accuracy'] >= ACC_STANDARD:
                 # good_acc_label message 구조로 바꿔줌
                 msg['label'] = label['label']

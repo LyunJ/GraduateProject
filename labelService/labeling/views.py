@@ -36,6 +36,10 @@ def getImageFromHbase(rowkey):
     return result
 
 # /labeling/image
+import base64
+import numpy as np
+from PIL import Image
+import io
 def image(request):
     # GET
     if request.method == 'GET':
@@ -54,12 +58,20 @@ def image(request):
         request.session['image_id'] = str(wdata['_id'])
         
         # django html form
-        labeling_form = LabelingForm(wdata['labels'][0]['label'],wdata['labels'][1]['label'],wdata['labels'][2]['label'])
+        labeling_form = LabelingForm(wdata['labels'])
         
         # html img의 src에 들어갈 url
         # 이미지를 base64형태로 넣어줌
-        image_rowkey = getImageFromHbase(wdata['image_rowkey'])
-        image_src = "data:image/png;base64,"+image_rowkey.decode('utf8')
+        
+        image = getImageFromHbase(wdata['image_rowkey'])
+        img_bytes = base64.b64decode(image)
+        img = np.frombuffer(img_bytes,dtype=np.uint8)
+        img = np.reshape(img,(64,64,3))
+        img = Image.fromarray(img)
+        buffer = io.BytesIO()
+        img.save(buffer,format="JPEG")
+        myimage=buffer.getvalue()
+        image_src = "data:image/png;base64,"+base64.b64encode(myimage).decode('utf8')
         return render(request,'labeling/index.html',{'form' : labeling_form,'image' : image_src})
     
     

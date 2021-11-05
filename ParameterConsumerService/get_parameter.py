@@ -19,7 +19,7 @@ kafka_ip = IP('../ips','kafka')
 from hdfs import InsecureClient
 def msg_process(msg):  
     client_hdfs = InsecureClient(f'http://{hadoop_ip}:9870')
-    client_hdfs.download(json.loads(msg.value())['url'],'./')
+    client_hdfs.download(json.loads(msg.value())['url'],'../parameter')
 
 def main():
     # 실행 방법 python get_parameter.py {topic}

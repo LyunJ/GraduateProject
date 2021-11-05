@@ -5,3 +5,6 @@ pymongo
 confluent_kafka
 django-cors-headers
 happybase
+pillow
+numpy
+base64

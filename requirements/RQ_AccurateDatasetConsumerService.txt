@@ -1,2 +1,5 @@
 confluent_kafka
 happybase
+pillow
+numpy
+base64

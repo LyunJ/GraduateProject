@@ -50,7 +50,7 @@ def parameter(request):
         
         # hdfs url을 kafka의 parameter topic에 전송
         producer = Producer(producer_conf)
-        producer.produce(PARAMETER_LABEL, key="", value = json.dumps({"url":"/tmp/test_new.pt"}))
+        producer.produce(PARAMETER_LABEL, key="", value = json.dumps({"url":"/tmp/model.zip"}))
         producer.flush()
         return HttpResponse("Thank you")
 

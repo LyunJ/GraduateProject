@@ -6,3 +6,25 @@ django-cors-headers
 confluent_kafka
 happybase
 opencv-python-headless
+pillow
+numpy
+pathlib
+tqdm
+tensorflow==2.6.1
+
+{% comment %} cpu로 할 때
+torch
+torchvision
+torchaudio {% endcomment %}
+
+{% comment %} gpu로 할 때
+torch==1.10.0+cu102
+torchvision==0.11.1+cu102
+torchaudio===0.10.0+cu102
+전문
+pip3 install torch==1.10.0+cu102 torchvision==0.11.1+cu102 torchaudio===0.10.0+cu102 -f https://download.pytorch.org/whl/cu102/torch_stable.html
+추가로
+cuda 10.2 https://developer.nvidia.com/cuda-10.2-download-archive?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1804&target_type=runfilelocal
+cudnn 7.6.5 https://developer.nvidia.com/rdp/cudnn-archive
+인터넷에서 다운받아서 설치해야됨 {% endcomment %}
+
