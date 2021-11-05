@@ -12,6 +12,8 @@ from ips import IP
 hbase_ip = IP('../ips','hbase')
 kafka_ip = IP('../ips','kafka')
 
+# 이미지 저장 위치
+output_basedir = './image'
 
 label_to_str = {
     0:"+자형교차로",
@@ -138,15 +140,17 @@ import io
 import numpy as np
 def msg_process(msg):    
     # 이미지 로컬에 저장
-    print(msg)
+    label_num = findKey(json.loads(msg.value())['label'])
+    
     image = getImageFromHbase(json.loads(msg.value())['image_rowkey'])
     img_bytes = base64.b64decode(image)
     img = np.frombuffer(img_bytes,dtype=np.uint8)
     img = np.reshape(img,(64,64,3))
     img = Image.fromarray(img)
     
-    label_num = findKey(json.loads(msg.value())['label'])
-    output_dir = f'./image/{label_num}'
+    # 라벨별 이미지 저장 위치
+    output_dir = f'{output_basedir}/{label_num}'
+    
     if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
     if len(os.listdir(output_dir)) != 0:
