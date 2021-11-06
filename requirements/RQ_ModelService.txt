@@ -6,11 +6,16 @@ django-cors-headers
 confluent_kafka
 happybase
 opencv-python-headless
-pillow
+Pillow==7.1.2
 numpy
 pathlib
 tqdm
 tensorflow==2.6.1
+pandas
+matplotlib
+seaborn
+requests==2.23.0
+keras==2.6.0
 
 {% comment %}
 cpu로 할 때
