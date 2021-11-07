@@ -139,8 +139,8 @@ class labeling():
         for device in gpu_devices:
             tf.config.experimental.set_memory_growth(device, True)
         
-        # self.device = torch.device('cuda:0')
-        self.device = torch.device('cpu')
+        self.device = torch.device('cuda:0')
+        # self.device = torch.device('cpu')
 
         with zipfile.ZipFile(Path(model_dir) / 'model.zip') as zip:
             zip.extractall(Path(model_dir))
@@ -218,12 +218,12 @@ class labeling():
             last_file = 0
         img.save(self.output_dir / f'{result}' / f'{int(last_file)+1}.jpg')
         pass
-
     def update_model(self):
         self.model0 = torch.hub.load(dir / 'yolov5', 'custom', path=weight_path, source='local').to(self.device)
         with zipfile.ZipFile(Path(model_dir) / 'model_new.zip') as zip:
             zip.extractall(Path(model_dir))
         self.model1 = tf.keras.models.load_model(model_dir)
+  
 
 
 if __name__ == "__main__":

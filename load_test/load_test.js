@@ -67,7 +67,7 @@ var xhr = [];
 var nice_count = 0;
 async function main() {
   var xhr = new XMLHttpRequest();
-  for (let i = 1; i <= 1000; i++) {
+  for (let i = 1; i <= 500; i++) {
     // GET test
     xhr.open("GET", url, true); // true for asynchronous
     xhr.send(null);

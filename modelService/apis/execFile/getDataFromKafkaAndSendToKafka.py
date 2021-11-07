@@ -58,8 +58,8 @@ def producer_process(key,msg):
         producer = Producer(producer_conf)
         for label in msg['labels']:
             # 거의 다 정확히 나와서 랜덤으로 bad_acc_label로 보내버림
-            # if random.randrange(1,100) > 80:
-            #     break
+            if random.randrange(1,100) > 80:
+                break
             if label['accuracy'] >= ACC_STANDARD:
                 # good_acc_label message 구조로 바꿔줌
                 msg['label'] = label['label']
