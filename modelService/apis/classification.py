@@ -131,7 +131,7 @@ model_dir = '../parameter' # docker 환경에 맞춤
 
 class labeling():
     def __init__(self, output_dir):
-        os.environ['CUDA_VISIBLE_DEVICES'] = ''
+        # os.environ['CUDA_VISIBLE_DEVICES'] = ''
         output_dir = Path(output_dir)
 
         # Tensorflow의 GPU 메모리 할당 문제를 해결해주는 코드(Tensorflow >= 2.0.0)
@@ -139,8 +139,8 @@ class labeling():
         # for device in gpu_devices:
         #     tf.config.experimental.set_memory_growth(device, True)
         
-        # self.device = torch.device('cuda:0')
-        self.device = torch.device('cpu')
+        self.device = torch.device('cuda:0')
+        # self.device = torch.device('cpu')
 
         with zipfile.ZipFile(Path(model_dir) / 'model.zip') as zip:
             zip.extractall(Path(model_dir))
