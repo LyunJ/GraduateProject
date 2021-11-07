@@ -13,6 +13,10 @@ labelsService/labelsService/__pycache__/
 labelsService/labeling/__pycache__/
 labelsService/labeling/migrations/
 
+# Images
+
+AccurateDatasetConsumerService/image/
+
 eureka-microservices/
 
 ips/ips.json
