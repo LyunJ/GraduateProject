@@ -33,8 +33,8 @@ model = classification.classificationModel('./deeplearning/parameterFile')
 from hdfs import InsecureClient
 def save_to_hdfs(data):
     client_hdfs = InsecureClient(f'http://{hadoop_ip}:9870')
-    client_hdfs.delete('/tmp/model_test.zip')
-    client_hdfs.write('/tmp/model_test.zip',data=data)
+    client_hdfs.delete('/tmp/model_new.zip')
+    client_hdfs.write('/tmp/model_new.zip',data=data)
 
 # byte[] 타입으로 파일 읽어오기
 def getParameterFile(fileName):
@@ -45,12 +45,12 @@ def getParameterFile(fileName):
 def parameter(request):
     if request.method == 'GET':
         # parameter 파일 load 후 hadoop에 업로드
-        data = getParameterFile('model.zip')
+        data = getParameterFile('model_new.zip')
         save_to_hdfs(data)
         
         # hdfs url을 kafka의 parameter topic에 전송
         producer = Producer(producer_conf)
-        producer.produce(PARAMETER_LABEL, key="", value = json.dumps({"url":"/tmp/model_test.zip"}))
+        producer.produce(PARAMETER_LABEL, key="", value = json.dumps({"url":"/tmp/model_new.zip"}))
         producer.flush()
         return HttpResponse("Thank you")
 
@@ -66,6 +66,11 @@ def trainingTest(request):
     if request.method == 'GET':
         # 모델 학습 개시
         # 모델 파일은 ./deeplaerning/parameterFile 경로로 저장 (이 파일의 디렉토리에 있음)
-        model.train(data_dir='')
+        data_dir = '../AccurateDatasetConsumerService/image'
+        for i in range(103):
+            if not os.path.isdir(data_dir + f'/{i}'):
+                os.mkdir(data_dir + f'/{i}')
+
+        model.train(data_dir=data_dir)
         model.zipmodel('./deeplearning/parameterFile')
         return HttpResponse("training complete")
