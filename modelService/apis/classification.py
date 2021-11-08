@@ -7,6 +7,7 @@ import tensorflow as tf
 import numpy as np
 import sys
 import zipfile
+import shutil
 
 dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, dir)
@@ -142,6 +143,7 @@ class labeling():
         self.device = torch.device('cuda:0')
         # self.device = torch.device('cpu')
 
+        self.delete_model(model_dir)
         with zipfile.ZipFile(Path(model_dir) / 'model.zip') as zip:
             zip.extractall(Path(model_dir))
 
@@ -217,12 +219,21 @@ class labeling():
         else:
             last_file = 0
         img.save(self.output_dir / f'{result}' / f'{int(last_file)+1}.jpg')
-        pass
+
     def update_model(self):
         self.model0 = torch.hub.load(dir / 'yolov5', 'custom', path=weight_path, source='local').to(self.device)
         with zipfile.ZipFile(Path(model_dir) / 'model_new.zip') as zip:
             zip.extractall(Path(model_dir))
         self.model1 = tf.keras.models.load_model(model_dir)
+
+    def delete_model(self, model_dir):
+        if os.path.isdir(Path(model_dir) / 'assets'):
+            os.rmdir(Path(model_dir) / 'assets')
+        if os.path.isdir(Path(model_dir) / 'variables'):
+            shutil.rmtree(Path(model_dir) / 'variables')
+        delete_list = [x for x in os.listdir(model_dir) if x not in ['model', 'model.zip', 'model_new.zip']]
+        for delete in delete_list:
+            os.remove(Path(model_dir) / delete)
   
 
 

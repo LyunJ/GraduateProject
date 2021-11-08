@@ -67,6 +67,6 @@ def trainingTest(request):
             if not os.path.isdir(data_dir + f'/{i}'):
                 os.mkdir(data_dir + f'/{i}')
 
-        # model.train(data_dir=data_dir)
+        model.train(data_dir=data_dir)
         model.zipmodel('./deeplearning/parameterFile')
         return HttpResponse("training complete")

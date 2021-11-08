@@ -22,6 +22,7 @@ dir = os.path.dirname(os.path.abspath(__file__))
 class classificationModel():
     def __init__(self, model_dir):
         # Load Model
+        self.delete_model(model_dir)
         model_name = 'model_new.zip' if os.path.isfile(Path(model_dir) / 'model_new.zip') else 'model.zip'
         with zipfile.ZipFile(Path(model_dir) / model_name) as zip:
             zip.extractall(Path(model_dir))
@@ -32,7 +33,7 @@ class classificationModel():
         data_gen = ImageDataGenerator(
             rescale=1./255,
             validation_split=0.2,
-            ) # 리스케일링 되었는지 모르겠음
+            )
         train_gen = data_gen.flow_from_directory(
             data_dir, 
             target_size=(64, 64),
@@ -73,3 +74,12 @@ class classificationModel():
                     zip.write(os.path.join(path, file))
             zip.close()
         os.chdir(origin_dir)
+
+    def delete_model(self, model_dir):
+        if os.path.isdir(Path(model_dir) / 'assets'):
+            os.rmdir(Path(model_dir) / 'assets')
+        if os.path.isdir(Path(model_dir) / 'variables'):
+            shutil.rmtree(Path(model_dir) / 'variables')
+        delete_list = [x for x in os.listdir(model_dir) if x not in ['model', 'model.zip', 'model_new.zip']]
+        for delete in delete_list:
+            os.remove(Path(model_dir) / delete)
