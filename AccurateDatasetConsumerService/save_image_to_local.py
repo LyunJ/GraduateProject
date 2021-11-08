@@ -131,7 +131,6 @@ import happybase
 import base64
 def getImageFromHbase(rowkey):
     conn = happybase.Connection(f'{hbase_ip}',9090,autoconnect=True)
-    
     result = conn.table('test').row(rowkey)[b'data:1']
     return result
 

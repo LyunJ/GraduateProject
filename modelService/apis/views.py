@@ -20,30 +20,6 @@ from PIL import Image
 
 model = classification.labeling('./apis/yolo')
 
-def getLabelAndAccuracyTmp(image):
-    # 딥러닝 팀
-    # 모델함수에 이미지를 넣었을 때 getLabelAndAccuracyTmp return의 구조로 출력될 수 있도록 코드 짜기
-    # 모델 파일 경로는 docker 공유 폴더 테스트 후 나오기 때문에 일단 임의로 테스트
-    # return 구조
-    #     [
-    #     {
-    #         'label' : 'A',
-    #         'accuracy' : acc1
-    #     },
-    #     {
-    #         'label' : 'B',
-    #         'accuracy' : acc2
-    #     },
-    #     {
-    #         'label' : 'C',
-    #         'accuracy' : acc3
-    #     },
-    #     ]
-    result, images = model.simple_predict(image)
-    result = [[{'label' : k, 'accuracy': v} for k, v in zip(classification.label_to_str.values(), r)] for r in result]
-    result = list(map(lambda x : list(filter(lambda x: x['accuracy'] != 0,x)),result))
-    return result, images
-
 def getLabelAndAccuracy(image):
     result, images = model.simple_predict(image)
     result = [[{'label' : k, 'accuracy': v} for k, v in zip(classification.label_to_str.values(), r)] for r in result]
@@ -72,9 +48,19 @@ def generateRowKey(image):
     result = unique_hash[:5] + unique_time + unique_image_1 + unique_image_2
     return result
 
+def checkRowkeyExistAndDelete(rowkey):
+    conn = happybase.Connection(f'{hbase_ip}',9090,autoconnect=True)
+    data = conn.table('test').row(rowkey)
+    if len(data) == 0:
+        return False
+    else:
+        conn.table('test').delete(rowkey)
+        return True
+
 
 import base64
 import io
+import copy
 # /api/labeling
 def labeling(request):
     if request.method == 'GET':
@@ -86,9 +72,8 @@ def labeling(request):
         # model로부터 라벨 후보와 accuracy받아오기
         labels, images = getLabelAndAccuracy(image)
         labeledImages = []
-        
+        resLabeledImages = []
         for label,i in zip(labels,images):
-            print(i.dtype)
             img = base64.b64encode(i).decode()
             rowkey = generateRowKey(img)
             sendImageToHbase(img,rowkey)
@@ -96,27 +81,51 @@ def labeling(request):
                 'image_rowkey' : rowkey,
                 'labels' : label
             }
+            
             labeledImages.append(labeledImage)
+            resLabeledImages.append(copy.deepcopy(labeledImage))
             producer_process("",labeledImage)
-        return JsonResponse({"labeledImages":labeledImages})
+
+            
+        for li in resLabeledImages:
+            max_count = 0
+            sl = ""
+            for l in li['labels']:
+                if l['accuracy'] > max_count:
+                    max_count = l['accuracy']
+                    sl = l['label']
+            li.pop('labels')
+            li['label'] = sl
+        return JsonResponse({"labeledImages":resLabeledImages})
 
 def labelingTest(request):
     if request.method == 'GET':
         # request body에서 base64로 인코딩된 image data 가져오기
-        # image = json.loads(request.body)['image']
-        
-        # test용
-        image = Image.open(r'C:\Users\tedle\work\project\graduate\s01000200.jpg')
-
+        image_body = json.loads(request.body)['image']
+        image_bytes = base64.b64decode(image_body)
+        image_file = io.BytesIO(image_bytes)
+        image = Image.open(image_file)
         # model로부터 라벨 후보와 accuracy받아오기
-        labels, images = getLabelAndAccuracyTmp(image)
+        labels, images = getLabelAndAccuracy(image)
         labeledImages = []
+
         for l,i in zip(labels,images):
+            img = base64.b64encode(i).decode()
+            rowkey = generateRowKey(img)
+            sendImageToHbase(img,rowkey)
             labeledImages.append({
-            'image_rowkey' : base64.b64encode(i).decode(),
-            'labels' : l
-        })
-        return JsonResponse({"labeledImages" : labeledImages})
+                'image_rowkey' : rowkey,
+                'labels' : l
+            })
+        
+        result = True
+        for li in labeledImages:
+            result = result & checkRowkeyExistAndDelete(li['image_rowkey'])
+        
+        if result == True:
+            return JsonResponse({"result" : "GOOD","labeledImages" : labeledImages})
+        if result == False:
+            return JsonResponse({"result" : "BAD"})
 
 def modelUpdate(request):
     if request.method == 'GET':
